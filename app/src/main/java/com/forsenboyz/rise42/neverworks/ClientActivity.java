@@ -92,7 +92,6 @@ public class ClientActivity extends AppCompatActivity {
             super.onProgressUpdate(values);
             //TODO: some shit with listView
             //listView.setText(values[0]);
-            //log("shit");
         }
     }
 
