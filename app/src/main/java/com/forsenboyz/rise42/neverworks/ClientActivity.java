@@ -8,6 +8,7 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,16 +22,26 @@ import java.net.UnknownHostException;
 public class ClientActivity extends AppCompatActivity {
 
     private String IP = "93.73.130.108";
-    volatile private boolean send = false;
-    volatile private String message;
+    private volatile boolean send = false;
+    private volatile String message;
     EditText editText;
     ListView listView;
     DataBaseHandler dbHandler;
+    ResourceCursorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
+
+        dbHandler = new DataBaseHandler(this);
+        //TODO: adapter stuff
+        /*adapter = new ResourceCursorAdapter() {
+            @Override
+            public void bindView(View view, Context context, Cursor cursor) {
+
+            }
+        };*/
 
         listView = (ListView) findViewById(R.id.listView);
         editText = (EditText) findViewById(R.id.editTextMessage);
