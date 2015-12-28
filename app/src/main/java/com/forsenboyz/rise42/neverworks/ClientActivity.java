@@ -8,7 +8,7 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ResourceCursorAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,21 +27,23 @@ public class ClientActivity extends AppCompatActivity {
     EditText editText;
     ListView listView;
     DataBaseHandler dbHandler;
-    ResourceCursorAdapter adapter;
+    SimpleCursorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
 
+        listView = (ListView) findViewById(R.id.listView);
+
         dbHandler = new DataBaseHandler(this);
         //TODO: adapter stuff
-        /*adapter = new ResourceCursorAdapter() {
-            @Override
-            public void bindView(View view, Context context, Cursor cursor) {
+        String[] from = {DataBaseCreator.MESSAGE_COLUMN};
+        int[] to = {R.id.message};
 
-            }
-        };*/
+        adapter = new SimpleCursorAdapter(this,R.layout.list_item,dbHandler.getAllRows(),from,to,0);
+
+        listView.setAdapter(adapter);
 
         listView = (ListView) findViewById(R.id.listView);
         editText = (EditText) findViewById(R.id.editTextMessage);
