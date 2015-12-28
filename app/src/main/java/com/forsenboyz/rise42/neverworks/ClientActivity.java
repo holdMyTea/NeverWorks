@@ -58,6 +58,7 @@ public class ClientActivity extends AppCompatActivity {
                         send = false;
                     } else {
                         message = buff;
+                        dbHandler.insertOutcome(message);                                                       //income insert
                         send = true;
                         editText.setText("");
                     }
@@ -89,7 +90,8 @@ public class ClientActivity extends AppCompatActivity {
                 while (true) {
                     response = in.readUTF();
                     if (!response.isEmpty()) {
-                        publishProgress(response);
+                        dbHandler.insertOutcome(response);                                                          //outcome insert
+                        //publishProgress(response);
                     }
                 }
             } catch (UnknownHostException e) {
@@ -104,7 +106,8 @@ public class ClientActivity extends AppCompatActivity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             //TODO: some shit with listView
-            listView.setText(values[0]);
+
+            //listView.setText(values[0]);
         }
     }
 
