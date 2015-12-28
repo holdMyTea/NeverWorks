@@ -33,17 +33,21 @@ public class ClientActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
+        log("Client started");
 
         listView = (ListView) findViewById(R.id.listView);
 
         dbHandler = new DataBaseHandler(this);
+        ClientActivity.log("DataBaseHandler created");
         //TODO: adapter stuff
         String[] from = {DataBaseCreator.MESSAGE_COLUMN};
         int[] to = {R.id.message};
 
         adapter = new SimpleCursorAdapter(this,R.layout.list_item,dbHandler.getAllRows(),from,to,0);
+        ClientActivity.log("Adapter created");
 
         listView.setAdapter(adapter);
+        ClientActivity.log("Adapter set");
 
         listView = (ListView) findViewById(R.id.listView);
         editText = (EditText) findViewById(R.id.editTextMessage);
@@ -59,6 +63,7 @@ public class ClientActivity extends AppCompatActivity {
                     } else {
                         message = buff;
                         dbHandler.insertOutcome(message);                                                       //income insert
+                        ClientActivity.log("DataBasing outcome");
                         send = true;
                         editText.setText("");
                     }
@@ -78,9 +83,9 @@ public class ClientActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             String response = "";
             try {
-                log("Connecting: " + IP + " to " + 1488);
+                ClientActivity.log("Connecting: " + IP + " to " + 1488);
                 Socket socket = new Socket(InetAddress.getByName(IP), 1488);
-                log("Connected");
+                ClientActivity.log("Connected");
 
                 DataInputStream in = new DataInputStream(socket.getInputStream());
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -90,6 +95,7 @@ public class ClientActivity extends AppCompatActivity {
                 while (true) {
                     response = in.readUTF();
                     if (!response.isEmpty()) {
+                        ClientActivity.log("DataBasing income");
                         dbHandler.insertOutcome(response);                                                          //outcome insert
                         //publishProgress(response);
                     }
@@ -120,11 +126,11 @@ public class ClientActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            log("Runned send stream");
+            ClientActivity.log("Runned send stream");
             try {
                 while (true) {
                     if (send) {
-                        log("Sending: " + message);
+                        ClientActivity.log("Sending: " + message);
                         out.writeUTF(message);
                         out.flush();
                         message = "";
@@ -137,7 +143,7 @@ public class ClientActivity extends AppCompatActivity {
         }
     }
 
-    private void log(String str) {
+    public static void log(String str) {
         Log.d("MY_TAG", str);
     }
 

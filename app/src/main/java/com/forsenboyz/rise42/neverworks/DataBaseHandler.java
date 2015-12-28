@@ -67,7 +67,7 @@ class DataBaseCreator extends SQLiteOpenHelper {
 
     public static final String[] KEYS = {ID_COLUMN,INCOME_COLUMN,MESSAGE_COLUMN};
 
-    public static final String DATABASE_NAME = "messageBase.baseCreator";
+    public static final String DATABASE_NAME = "messageBase.db";
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_TABLE = "messages";
 
@@ -79,15 +79,17 @@ class DataBaseCreator extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String script = "create table "+DATABASE_NAME
-                +" ("+ID_COLUMN+" integer primary key autoincrement, "
+        String script = "create table "+DATABASE_TABLE
+                +" (" +ID_COLUMN+" integer primary key autoincrement, "
                 +INCOME_COLUMN+" integer, "+MESSAGE_COLUMN +" text);";
         db.execSQL(script);
+        ClientActivity.log("DataBase created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF IT EXISTS "+DATABASE_TABLE);
+        ClientActivity.log("DataBase wasted");
         onCreate(db);
     }
 }
