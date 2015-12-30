@@ -14,6 +14,7 @@ public class DataBaseHandler {
     DataBaseHandler(Context context){
         baseCreator = new DataBaseCreator(context);
         db = baseCreator.getWritableDatabase();
+        ClientActivity.log("Base created "+baseCreator.getDatabaseName());
     }
 
     public long insertIncome(String message){
@@ -33,7 +34,7 @@ public class DataBaseHandler {
         contentValues.put(DataBaseCreator.INCOME_COLUMN,income);
         contentValues.put(DataBaseCreator.MESSAGE_COLUMN, message);
 
-        return db.insert(baseCreator.getDatabaseName(),null,contentValues);
+        return db.insert(DataBaseCreator.DATABASE_TABLE,null,contentValues);
     }
 
     public Cursor getRow(long rowID){

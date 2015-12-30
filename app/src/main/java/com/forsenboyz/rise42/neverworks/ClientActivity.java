@@ -1,14 +1,19 @@
 package com.forsenboyz.rise42.neverworks;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +32,8 @@ public class ClientActivity extends AppCompatActivity {
     EditText editText;
     ListView listView;
     DataBaseHandler dbHandler;
-    SimpleCursorAdapter adapter;
+    ListAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,21 +41,13 @@ public class ClientActivity extends AppCompatActivity {
         setContentView(R.layout.activity_client);
         log("Client started");
 
-        listView = (ListView) findViewById(R.id.listView);
-
         dbHandler = new DataBaseHandler(this);
-        ClientActivity.log("DataBaseHandler created");
-        //TODO: adapter stuff
-        String[] from = {DataBaseCreator.MESSAGE_COLUMN};
-        int[] to = {R.id.message};
-
-        adapter = new SimpleCursorAdapter(this,R.layout.list_item,dbHandler.getAllRows(),from,to,0);
-        ClientActivity.log("Adapter created");
-
-        listView.setAdapter(adapter);
-        ClientActivity.log("Adapter set");
 
         listView = (ListView) findViewById(R.id.listView);
+
+        adapter = new ListAdapter(this,dbHandler.getAllRows());
+        listView.setAdapter(adapter);
+
         editText = (EditText) findViewById(R.id.editTextMessage);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -62,8 +60,11 @@ public class ClientActivity extends AppCompatActivity {
                         send = false;
                     } else {
                         message = buff;
-                        dbHandler.insertOutcome(message);                                                       //income insert
+                        dbHandler.insertOutcome(message);
+                        //TODO: HERE THE MAGIC COMES (prbbl not)
+                        ClientActivity.log("Cursor magic");
                         ClientActivity.log("DataBasing outcome");
+                        adapter.changeCursor(dbHandler.getAllRows());
                         send = true;
                         editText.setText("");
                     }
@@ -74,10 +75,10 @@ public class ClientActivity extends AppCompatActivity {
 
 
         IP = getIntent().getStringExtra("ip");
-        new Running().execute();
+        new MessageSender().execute();
     }
 
-    private class Running extends AsyncTask<Void, String, Void> {
+    private class MessageSender extends AsyncTask<Void, String, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -96,8 +97,7 @@ public class ClientActivity extends AppCompatActivity {
                     response = in.readUTF();
                     if (!response.isEmpty()) {
                         ClientActivity.log("DataBasing income");
-                        dbHandler.insertOutcome(response);                                                          //outcome insert
-                        //publishProgress(response);
+                        publishProgress(response);
                     }
                 }
             } catch (UnknownHostException e) {
@@ -111,9 +111,9 @@ public class ClientActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            //TODO: some shit with listView
-
-            //listView.setText(values[0]);
+            log("Income update");
+            dbHandler.insertOutcome(values[0]);
+            adapter.changeCursor(dbHandler.getAllRows());
         }
     }
 
@@ -140,6 +140,34 @@ public class ClientActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private class ListAdapter extends CursorAdapter{
+
+        public ListAdapter(Context context,Cursor c){
+            super(context,c,0);
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View v = inflater.inflate(R.layout.list_item,parent,false);
+            log(v.toString());
+            return v;
+            //return LayoutInflater.from(context).inflate(R.layout.list_item,parent,false);
+        }
+
+        @Override
+        public void bindView(View v, Context context, Cursor cursor) {
+            TextView textId = (TextView) v.findViewById(R.id.textID);
+            TextView textMessage = (TextView) v.findViewById(R.id.textMessage);
+
+            String id = Integer.toString(cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseCreator.ID_COLUMN)));
+            String text = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.MESSAGE_COLUMN));
+
+            textId.setText(id);
+            textMessage.setText(text);
         }
     }
 
