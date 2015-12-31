@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +28,7 @@ import java.net.UnknownHostException;
 public class ClientActivity extends AppCompatActivity {
 
     private String IP = "93.73.130.108";
+    Socket socket;
     private volatile boolean send = false;
     private volatile String message;
     EditText editText;
@@ -78,6 +80,20 @@ public class ClientActivity extends AppCompatActivity {
         new MessageSender().execute();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        try{
+            socket.close();
+            dbHandler.close();
+        } catch (Exception e){
+            e.printStackTrace();
+            log("EXCEPTED");
+        }
+
+    }
+
     private class MessageSender extends AsyncTask<Void, String, Void> {
 
         @Override
@@ -85,7 +101,7 @@ public class ClientActivity extends AppCompatActivity {
             String response = "";
             try {
                 ClientActivity.log("Connecting: " + IP + " to " + 1488);
-                Socket socket = new Socket(InetAddress.getByName(IP), 1488);
+                socket = new Socket(InetAddress.getByName(IP), 1488);
                 ClientActivity.log("Connected");
 
                 DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -112,7 +128,7 @@ public class ClientActivity extends AppCompatActivity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             log("Income update");
-            dbHandler.insertOutcome(values[0]);
+            dbHandler.insertIncome(values[0]);
             adapter.changeCursor(dbHandler.getAllRows());
         }
     }
@@ -151,22 +167,28 @@ public class ClientActivity extends AppCompatActivity {
 
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View v = inflater.inflate(R.layout.list_item,parent,false);
-            log(v.toString());
-            return v;
-            //return LayoutInflater.from(context).inflate(R.layout.list_item,parent,false);
+            return LayoutInflater.from(context).inflate(R.layout.list_item,parent,false);
         }
 
         @Override
         public void bindView(View v, Context context, Cursor cursor) {
-            TextView textId = (TextView) v.findViewById(R.id.textID);
             TextView textMessage = (TextView) v.findViewById(R.id.textMessage);
 
-            String id = Integer.toString(cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseCreator.ID_COLUMN)));
             String text = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.MESSAGE_COLUMN));
 
-            textId.setText(id);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textMessage.getLayoutParams());
+
+            boolean income = (cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseCreator.INCOME_COLUMN))) > 0;
+
+            log("Params = "+Boolean.toString(income));
+
+            if(income){
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            } else{
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            }
+            textMessage.setLayoutParams(params);
+
             textMessage.setText(text);
         }
     }
