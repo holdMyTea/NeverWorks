@@ -34,7 +34,7 @@ public class DataBaseHandler {
         contentValues.put(DataBaseCreator.INCOME_COLUMN,income);
         contentValues.put(DataBaseCreator.MESSAGE_COLUMN, message);
 
-        return db.insert(DataBaseCreator.DATABASE_TABLE,null,contentValues);
+        return db.insert(DataBaseCreator.DATABASE_TABLE, null, contentValues);
     }
 
     public Cursor getRow(long rowID){
@@ -52,6 +52,9 @@ public class DataBaseHandler {
         return c;
     }
 
+    public void dropTable(){
+        baseCreator.onUpgrade(db,DataBaseCreator.DATABASE_VERSION,Integer.valueOf(DataBaseCreator.DATABASE_VERSION + 1));
+    }
 
     public void close(){
         baseCreator.close();
@@ -72,7 +75,6 @@ class DataBaseCreator extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_TABLE = "messages";
 
-
     DataBaseCreator(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -80,17 +82,18 @@ class DataBaseCreator extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String script = "create table "+DATABASE_TABLE
-                +" (" +ID_COLUMN+" integer primary key autoincrement, "
+        String createTable = "create table "+DATABASE_TABLE +" ("
+                +ID_COLUMN+" integer primary key autoincrement, "
                 +INCOME_COLUMN+" integer, "+MESSAGE_COLUMN +" text);";
-        db.execSQL(script);
+        db.execSQL(createTable);
         ClientActivity.log("DataBase created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF IT EXISTS "+DATABASE_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE);
         ClientActivity.log("DataBase wasted");
         onCreate(db);
     }
+
 }

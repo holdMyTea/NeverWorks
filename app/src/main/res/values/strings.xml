@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NeverWorks</string>
+    <string name="menu_cleanDB">Clean DB</string>
 </resources>
