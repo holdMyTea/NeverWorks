@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,6 +36,7 @@ public class ClientActivity extends AppCompatActivity {
     private volatile String message;
     EditText editText;
     ListView listView;
+    Toolbar toolbar;
     DataBaseHandler dbHandler;
     ListAdapter adapter;
 
@@ -90,6 +92,8 @@ public class ClientActivity extends AppCompatActivity {
             }
         });
 
+        toolbar.
+        setSupportActionBar(toolbar);
 
         IP = getIntent().getStringExtra("ip");
         new MessageSender().execute();
