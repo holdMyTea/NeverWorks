@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">NeverWorks</string>
     <string name="menu_cleanDB">Clean DB</string>
+    <string name="title_activity_client">ClientActivity</string>
 </resources>

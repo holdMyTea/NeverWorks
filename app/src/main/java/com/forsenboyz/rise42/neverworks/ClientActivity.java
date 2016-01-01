@@ -58,6 +58,9 @@ public class ClientActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         log("Client started");
 
         dbHandler = new DataBaseHandler(this);
@@ -91,9 +94,6 @@ public class ClientActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        toolbar.
-        setSupportActionBar(toolbar);
 
         IP = getIntent().getStringExtra("ip");
         new MessageSender().execute();
@@ -179,7 +179,7 @@ public class ClientActivity extends AppCompatActivity {
         }
     }
 
-    private class ListAdapter extends CursorAdapter{
+    private class ListAdapter extends CursorAdapter {
 
         public ListAdapter(Context context,Cursor c){
             super(context,c,0);
