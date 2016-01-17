@@ -1,2 +1,10 @@
 <resources>>
+
+    <style name="AppTheme.PrbblNActnBr" parent="android:Theme.DeviceDefault.Light.Dialog.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorPrimary">@color/primary_material_light</item>
+    </style>
 </resources>

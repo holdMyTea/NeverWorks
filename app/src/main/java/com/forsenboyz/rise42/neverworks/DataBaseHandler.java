@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DataBaseHandler {
     private DataBaseCreator baseCreator;
@@ -14,7 +15,7 @@ public class DataBaseHandler {
     DataBaseHandler(Context context){
         baseCreator = new DataBaseCreator(context);
         db = baseCreator.getWritableDatabase();
-        ClientActivity.log("Base created "+baseCreator.getDatabaseName());
+        Log.d("MY_TAG","Base created "+baseCreator.getDatabaseName());
     }
 
     public long insertIncome(String message){
@@ -53,12 +54,13 @@ public class DataBaseHandler {
     }
 
     public void dropTable(){
-        baseCreator.onUpgrade(db,DataBaseCreator.DATABASE_VERSION,Integer.valueOf(DataBaseCreator.DATABASE_VERSION + 1));
+        baseCreator.onUpgrade(db, DataBaseCreator.DATABASE_VERSION, Integer.valueOf(DataBaseCreator.DATABASE_VERSION + 1));
     }
 
     public void close(){
         baseCreator.close();
     }
+
 }
 
 
@@ -86,13 +88,13 @@ class DataBaseCreator extends SQLiteOpenHelper {
                 +ID_COLUMN+" integer primary key autoincrement, "
                 +INCOME_COLUMN+" integer, "+MESSAGE_COLUMN +" text);";
         db.execSQL(createTable);
-        ClientActivity.log("DataBase created");
+        Log.d("MY_TAG","DataBase created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE);
-        ClientActivity.log("DataBase wasted");
+        Log.d("MY_TAG","DataBase wasted");
         onCreate(db);
     }
 

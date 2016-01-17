@@ -1,41 +1,83 @@
 package com.forsenboyz.rise42.neverworks;
 
-import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
-    EditText editText;
+    LoginFragment loginFragment;
+    MessageFragment messageFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button buttonClient = (Button) findViewById(R.id.buttonClient);
-        Button buttonServer = (Button) findViewById(R.id.buttonServer);
-        editText = (EditText) findViewById(R.id.editText2);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        buttonClient.setOnClickListener(this);
-        buttonServer.setOnClickListener(this);
+        loginFragment = new LoginFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer,loginFragment).commit();
+
+        new fragmentSwitcher().execute();
     }
 
     @Override
-    public void onClick(View view) {
-        int v = view.getId();
-        Intent intent;
-        if(v==R.id.buttonClient){
-            intent = new Intent(this, ClientActivity.class);
-            intent.putExtra("ip",editText.getText().toString());
-            startActivity(intent);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.main_item1) {
+            Toast.makeText(this,"Nothing 1",Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.main_item2) {
+            Toast.makeText(this,"Nothing 2",Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.main_item3) {
+            Toast.makeText(this,"Nothing 3",Toast.LENGTH_SHORT).show();
+            return true;
         }
-        else if(v==R.id.buttonServer){
-            intent = new Intent(this, ServerActivity.class);
-            startActivity(intent);
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    class fragmentSwitcher extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d("MY_TAG","Switcher started");
+            while(!loginFragment.isSwitch()){}
+            Log.d("MY_TAG","Time to switch");
+            publishProgress();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            Log.d("MY_TAG","Actually switching fragments");
+            messageFragment = new MessageFragment();
+
+            Log.d("MY_TAG","Passing socket between fragments");
+            messageFragment.setSocket(loginFragment.getSocket());
+            messageFragment.setIn(loginFragment.getIn());
+            messageFragment.setOut(loginFragment.getOut());
+
+            Log.d("MY_TAG", "Starting new fragment");
+            getSupportFragmentManager().beginTransaction().remove(loginFragment).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer,messageFragment).commit();
         }
     }
 }

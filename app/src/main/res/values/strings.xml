@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">NeverWorks</string>
-    <string name="menu_cleanDB">Clean DB</string>
-    <string name="title_activity_client">ClientActivity</string>
+    <string name="login">Login</string>
+    <string name="passsword">Password</string>
+    <string name="loginButton">Log in</string>
+
+    <string name="menu_item1">Smth to do1</string>
+    <string name="menu_item2">Smth to do2</string>
+    <string name="menu_item3">Smth to do3</string>
+
 </resources>
