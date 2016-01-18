@@ -8,21 +8,37 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <EditText
-        android:id="@+id/editTextMessage"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:imeOptions="actionSend"
-        android:inputType="text"
-        android:singleLine="true" />
+        android:orientation="horizontal"
+        android:id="@+id/inputForm">
+
+        <EditText
+            android:id="@+id/editTextMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSend"
+            android:inputType="text"
+            android:singleLine="true"
+            android:layout_weight="100" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="350"
+            android:id="@+id/buttonSend"
+            android:text="@string/Send" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/editTextMessage"
+        android:layout_above="@+id/inputForm"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

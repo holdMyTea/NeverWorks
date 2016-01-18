@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -29,6 +30,7 @@ public class MessageFragment extends Fragment {
     View fragmentHolder;
     ListView listView;
     EditText editText;
+    Button sendButton;
 
     Socket socket;
     DataInputStream in;
@@ -36,6 +38,8 @@ public class MessageFragment extends Fragment {
 
     DataBaseHandler dbHandler;
     ListAdapter adapter;
+
+    private String currentUser;
 
 
     // Required empty public constructor
@@ -57,21 +61,17 @@ public class MessageFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId == EditorInfo.IME_ACTION_SEND){
-                    String buff = editText.getText().toString();
-                    if (buff.isEmpty()) {
-                        Toast.makeText(getActivity(), "Not sent, nothing to send", Toast.LENGTH_SHORT).show();
-                    } else {
-                        /*message = buff;
-                        dbHandler.insertOutcome(message);
-                        log("Cursor magic");
-                        log("DataBasing outcome");
-                        adapter.changeCursor(dbHandler.getAllRows());
-                        send = true;
-                        editText.setText("");*/
-                        new Thread(new MessageSender(buff)).start();
-                    }
+                    sendMessage();
                 }
                 return false;
+            }
+        });
+
+        sendButton = (Button) fragmentHolder.findViewById(R.id.buttonSend);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
             }
         });
 
@@ -80,6 +80,15 @@ public class MessageFragment extends Fragment {
         return  fragmentHolder;
     }
 
+    private void sendMessage(){
+        String buff = editText.getText().toString();
+        if (buff.isEmpty()) {
+            Toast.makeText(getActivity(), "Not sent, nothing to send", Toast.LENGTH_SHORT).show();
+        } else {
+            new Thread(new MessageSender(buff)).start();
+            editText.setText("");
+        }
+    }
 
 
     public void setSocket(Socket socket) {
@@ -92,6 +101,10 @@ public class MessageFragment extends Fragment {
 
     public void setOut(DataOutputStream out) {
         this.out = out;
+    }
+
+    public void setCurrentUser(String currentUser) {
+        this.currentUser = currentUser;
     }
 
     public static void log(String str) {
@@ -128,6 +141,7 @@ public class MessageFragment extends Fragment {
             try {
                 while (true) {
                     response = in.readUTF();
+                    log(response);
                     if (!response.isEmpty()) {
                         log("DataBasing income");
                         publishProgress(response);
@@ -145,10 +159,9 @@ public class MessageFragment extends Fragment {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             log("Income update");
-            if(values[0].charAt(0)==':'){
+            if(values[0].substring(1,values[0].indexOf('_',1)).equals(currentUser)){
                 // ':' indicates that message was sent by this client
-                //TODO: remove ':' at the beginning
-                dbHandler.insertOutcome(values[0]);
+                dbHandler.insertOutcome(values[0].substring(1));
             }
             else{
                 //TODO: different user messages

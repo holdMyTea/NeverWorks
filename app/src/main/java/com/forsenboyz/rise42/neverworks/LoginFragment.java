@@ -38,6 +38,8 @@ public class LoginFragment extends Fragment {
 
     private volatile boolean switchFragment = false; //indicates, whether login is successful
 
+    private String currentUser;
+
 
     //Required by default
     public LoginFragment() {
@@ -51,6 +53,10 @@ public class LoginFragment extends Fragment {
         editLogin = (EditText) fragmentHolder.findViewById(R.id.editLogin);
         editPassword = (EditText) fragmentHolder.findViewById(R.id.editPassword);
         buttonLogin = (Button) fragmentHolder.findViewById(R.id.buttonLogin);
+
+        //to0 lazy
+        editLogin.setText(R.string.loginKappa);
+        editPassword.setText(R.string.passKappa);
 
         // NEXT -> editPassword to focus
         editLogin.setOnEditorActionListener(new EditText.OnEditorActionListener() {
@@ -111,7 +117,9 @@ public class LoginFragment extends Fragment {
         Log.d("MY_TAG", str);
     }
 
-
+    public String getCurrentUser() {
+        return currentUser;
+    }
 
 
     class MyLogger extends AsyncTask<Void, Boolean, Void> {
@@ -147,34 +155,59 @@ public class LoginFragment extends Fragment {
 
         //Sending login and pass and receiving feedback
         private boolean loggingIn() {
-            String login = "_login_" + editLogin.getText();
-            String password = "_pass_" + editPassword.getText();
+            String login = editLogin.getText().toString();
+            String password = editPassword.getText().toString();
 
             try {
                 socket = new Socket();
                 log("opening socket");
-                socket.connect(new InetSocketAddress(IP,PORT), 3000);
+                socket.connect(new InetSocketAddress(IP, PORT), 3000);
 
                 log("opening streams");
                 in = new DataInputStream(socket.getInputStream());
                 out = new DataOutputStream(socket.getOutputStream());
 
                 log("sending login: " + login);
-                out.writeUTF(login);
+                out.writeUTF("_login_" + login);
                 log("sending password: " + password);
-                out.writeUTF(password);
+                out.writeUTF("_pass_" + password);
 
-                return in.readBoolean();
+                if(in.readBoolean()) {
+                    currentUser = login;
+                    return true;
+                } else {
+                    closeAll();
+                    return false;
+                }
+
             }  catch (SocketTimeoutException s){
                 log("Connection time expired");
                 s.printStackTrace();
+
+                closeAll();
+
                 return false;
+
             } catch (IOException e) {
                 log("Connection failed");
                 e.printStackTrace();
+
+                closeAll();
+
                 return false;
             }
 
+        }
+
+        private void closeAll(){
+            try{
+                log("Closing socket and streams");
+                in.close();
+                out.close();
+                socket.close();
+            } catch (IOException ex){
+                log("Closing exception, mystery!!1");
+            }
         }
 
 

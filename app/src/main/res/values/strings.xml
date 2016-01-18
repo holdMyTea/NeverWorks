@@ -4,8 +4,12 @@
     <string name="passsword">Password</string>
     <string name="loginButton">Log in</string>
 
+    <string name="Send">Send</string>
+
     <string name="menu_item1">Smth to do1</string>
     <string name="menu_item2">Smth to do2</string>
     <string name="menu_item3">Smth to do3</string>
 
+    <string name="loginKappa">Kappa</string>
+    <string name="passKappa">passKappa</string>
 </resources>
