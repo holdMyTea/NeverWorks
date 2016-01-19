@@ -122,7 +122,10 @@ public class LoginFragment extends Fragment {
     }
 
 
-    class MyLogger extends AsyncTask<Void, Boolean, Void> {
+    class MyLogger extends AsyncTask<Void, String, Void> {
+
+        // to indicate whether connection was successful or what the reason otherwise
+        String connectionResult = "";
 
         //blocking views to prevent launching parallel logging thread
         MyLogger() {
@@ -136,19 +139,41 @@ public class LoginFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... params) {
             log("Thread started");
-            publishProgress(loggingIn());
+            loggingIn();
+            publishProgress(connectionResult);
             log("Thread ended");
             return null;
         }
 
 
         @Override
-        protected void onProgressUpdate(Boolean... values) {
-            if (values[0]) {
+        protected void onProgressUpdate(String... values) {
+            if (connectionResult.equals("good")) {
                 //switching to messaging fragment
                 log("Changing fragment");
                 switchFragment = true;
             } else {
+                String toast;
+                switch (connectionResult) {
+                    case "bad": {
+                        toast = "Wrong login or password";
+                        break;
+                    }
+                    case "timeExpired": {
+                        toast = "Connection time expired";
+                        break;
+                    }
+                    case "missingServer": {
+                        toast = "No server connection";
+                        break;
+                    }
+                    default:{
+                        // for unexpected cases, which are unexpected
+                        toast = "Impossible christmas miracle";
+                        break;
+                    }
+                }
+                Toast.makeText(getActivity(),toast,Toast.LENGTH_LONG).show();
                 unlockLogging();
             }
         }
@@ -161,7 +186,7 @@ public class LoginFragment extends Fragment {
             try {
                 socket = new Socket();
                 log("opening socket");
-                socket.connect(new InetSocketAddress(IP, PORT), 3000);
+                socket.connect(new InetSocketAddress(IP, PORT), 3*1000);
 
                 log("opening streams");
                 in = new DataInputStream(socket.getInputStream());
@@ -172,48 +197,48 @@ public class LoginFragment extends Fragment {
                 log("sending password: " + password);
                 out.writeUTF("_pass_" + password);
 
-                if(in.readBoolean()) {
+                if (in.readBoolean()) {
+                    log("Current user: "+currentUser);
                     currentUser = login;
+                    connectionResult = "good";
                     return true;
                 } else {
+                    connectionResult = "bad";
                     closeAll();
                     return false;
                 }
 
-            }  catch (SocketTimeoutException s){
+            } catch (SocketTimeoutException s) {
                 log("Connection time expired");
-                s.printStackTrace();
-
+                connectionResult = "timeExpired";
                 closeAll();
 
                 return false;
 
             } catch (IOException e) {
-                log("Connection failed");
-                e.printStackTrace();
-
                 closeAll();
-
                 return false;
             }
 
         }
 
-        private void closeAll(){
-            try{
+        private void closeAll() {
+            try {
                 log("Closing socket and streams");
                 in.close();
                 out.close();
                 socket.close();
-            } catch (IOException ex){
+            } catch (IOException ex) {
                 log("Closing exception, mystery!!1");
+            } catch (NullPointerException e) {
+                log("Not initialized, missing server");
+                connectionResult = "missingServer";
             }
         }
 
 
         //unlocking button
         private void unlockLogging() {
-            Toast.makeText(getActivity(), "Logging failed", Toast.LENGTH_SHORT).show();
             log("Unlocking buttons");
             buttonLogin.setEnabled(true);
             editLogin.setEnabled(true);

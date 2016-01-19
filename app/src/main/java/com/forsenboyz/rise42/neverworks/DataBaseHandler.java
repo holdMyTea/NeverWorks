@@ -12,27 +12,25 @@ public class DataBaseHandler {
     private DataBaseCreator baseCreator;
     private SQLiteDatabase db;
 
+    private String currentUser;
+
     DataBaseHandler(Context context){
         baseCreator = new DataBaseCreator(context);
         db = baseCreator.getWritableDatabase();
         Log.d("MY_TAG","Base created "+baseCreator.getDatabaseName());
     }
 
-    public long insertIncome(String message){
-        return insertRow(true,message);
-    }
-
-    public long insertOutcome(String message){
-        return insertRow(false,message);
+    public void insertOutcome(String message){
+        insertRow("_me",message);
     }
 
     public boolean isOpen(){
         return db.isOpen();
     }
 
-    public long insertRow(boolean income, String message){
+    public long insertRow(String from, String message){
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DataBaseCreator.INCOME_COLUMN,income);
+        contentValues.put(DataBaseCreator.SENDER_COLUMN,from);
         contentValues.put(DataBaseCreator.MESSAGE_COLUMN, message);
 
         return db.insert(DataBaseCreator.DATABASE_TABLE, null, contentValues);
@@ -61,6 +59,9 @@ public class DataBaseHandler {
         baseCreator.close();
     }
 
+    public void setCurrentUser(String currentUser) {
+        this.currentUser = currentUser;
+    }
 }
 
 
@@ -68,13 +69,13 @@ public class DataBaseHandler {
 class DataBaseCreator extends SQLiteOpenHelper {
 
     public static final String ID_COLUMN = "_id";
-    public static final String INCOME_COLUMN = "income";
+    public static final String SENDER_COLUMN = "sender";
     public static final String MESSAGE_COLUMN = "message";
 
-    public static final String[] KEYS = {ID_COLUMN,INCOME_COLUMN,MESSAGE_COLUMN};
+    public static final String[] KEYS = {ID_COLUMN, SENDER_COLUMN,MESSAGE_COLUMN};
 
     public static final String DATABASE_NAME = "messageBase.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_TABLE = "messages";
 
     DataBaseCreator(Context context){
@@ -86,7 +87,8 @@ class DataBaseCreator extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createTable = "create table "+DATABASE_TABLE +" ("
                 +ID_COLUMN+" integer primary key autoincrement, "
-                +INCOME_COLUMN+" integer, "+MESSAGE_COLUMN +" text);";
+                + SENDER_COLUMN +" text, "
+                +MESSAGE_COLUMN +" text);";
         db.execSQL(createTable);
         Log.d("MY_TAG","DataBase created");
     }

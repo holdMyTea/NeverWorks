@@ -105,6 +105,7 @@ public class MessageFragment extends Fragment {
 
     public void setCurrentUser(String currentUser) {
         this.currentUser = currentUser;
+        dbHandler.setCurrentUser(currentUser);
     }
 
     public static void log(String str) {
@@ -123,6 +124,7 @@ public class MessageFragment extends Fragment {
         @Override
         public void run() {
             try {
+                message = "_"+currentUser+"_"+message;
                 log("Sending message");
                 out.writeUTF(message);
             } catch(Exception e){
@@ -143,7 +145,7 @@ public class MessageFragment extends Fragment {
                     response = in.readUTF();
                     log(response);
                     if (!response.isEmpty()) {
-                        log("DataBasing income");
+                        log("Income update");
                         publishProgress(response);
                     }
                 }
@@ -157,15 +159,22 @@ public class MessageFragment extends Fragment {
 
         @Override
         protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            log("Income update");
-            if(values[0].substring(1,values[0].indexOf('_',1)).equals(currentUser)){
+            log("Updating database");
+
+            int messageBeginning = values[0].indexOf('_',2);
+
+            String from = values[0].substring(1, messageBeginning);
+            String message = values[0].substring(messageBeginning+1);
+
+            log("message from "+from+" : "+message);
+
+            if(from.equals(currentUser)){
                 // ':' indicates that message was sent by this client
-                dbHandler.insertOutcome(values[0].substring(1));
+                dbHandler.insertOutcome(message);
             }
             else{
                 //TODO: different user messages
-                dbHandler.insertIncome(values[0]);
+                dbHandler.insertRow(from,message);
             }
             adapter.changeCursor(dbHandler.getAllRows());
         }
@@ -186,21 +195,25 @@ public class MessageFragment extends Fragment {
         @Override
         public void bindView(View v, Context context, Cursor cursor) {
             TextView textMessage = (TextView) v.findViewById(R.id.textMessage);
+            TextView textSender = (TextView) v.findViewById(R.id.textSender);
 
-            String text = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.MESSAGE_COLUMN));
+            String from = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN));
+            String message = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.MESSAGE_COLUMN));
 
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textMessage.getLayoutParams());
+            boolean outcome = (cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN))).equals("_me");
 
-            boolean income = (cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseCreator.INCOME_COLUMN))) > 0;
-
-            if(income){
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            } else{
+            if(outcome){
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textMessage.getLayoutParams());
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                textMessage.setLayoutParams(params);
+            } else{
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textSender.getLayoutParams());
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                textSender.setLayoutParams(params);
             }
-            textMessage.setLayoutParams(params);
 
-            textMessage.setText(text);
+            textSender.setText(from);
+            textMessage.setText(message);
         }
     }
 }

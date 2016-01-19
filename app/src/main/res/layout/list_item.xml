@@ -4,13 +4,24 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textSender"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:text="from"
+        android:layout_alignStart="@id/textSender"
+        android:layout_alignLeft="@id/textSender"/>
 
     <TextView
         android:id="@+id/textMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:text="rfbwihbwh" />
+        android:layout_toRightOf="@id/textSender"
+        android:layout_toEndOf="@id/textSender"
+        android:text="message" />
 
 
 </RelativeLayout>

@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             messageFragment.setSocket(loginFragment.getSocket());
             messageFragment.setIn(loginFragment.getIn());
             messageFragment.setOut(loginFragment.getOut());
+            messageFragment.setCurrentUser(loginFragment.getCurrentUser());
 
             Log.d("MY_TAG", "Starting new fragment");
             getSupportFragmentManager().beginTransaction().remove(loginFragment).commit();
