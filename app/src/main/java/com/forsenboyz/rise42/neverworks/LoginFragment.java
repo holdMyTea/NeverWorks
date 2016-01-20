@@ -198,8 +198,8 @@ public class LoginFragment extends Fragment {
                 out.writeUTF("_pass_" + password);
 
                 if (in.readBoolean()) {
-                    log("Current user: "+currentUser);
                     currentUser = login;
+                    log("Current user: "+currentUser);
                     connectionResult = "good";
                     return true;
                 } else {

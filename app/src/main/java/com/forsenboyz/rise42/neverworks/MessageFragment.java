@@ -49,6 +49,7 @@ public class MessageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         dbHandler = new DataBaseHandler(getActivity());
+        dbHandler.setCurrentUser(currentUser);
 
         fragmentHolder = inflater.inflate(R.layout.fragment_message, container, false);
 
@@ -105,7 +106,7 @@ public class MessageFragment extends Fragment {
 
     public void setCurrentUser(String currentUser) {
         this.currentUser = currentUser;
-        dbHandler.setCurrentUser(currentUser);
+        log("Message user: "+this.currentUser);
     }
 
     public static void log(String str) {
@@ -145,7 +146,7 @@ public class MessageFragment extends Fragment {
                     response = in.readUTF();
                     log(response);
                     if (!response.isEmpty()) {
-                        log("Income update");
+                        log("Income update: "+response);
                         publishProgress(response);
                     }
                 }
@@ -166,14 +167,12 @@ public class MessageFragment extends Fragment {
             String from = values[0].substring(1, messageBeginning);
             String message = values[0].substring(messageBeginning+1);
 
-            log("message from "+from+" : "+message);
-
             if(from.equals(currentUser)){
-                // ':' indicates that message was sent by this client
+                log("Inserting outcome: "+message);
                 dbHandler.insertOutcome(message);
             }
             else{
-                //TODO: different user messages
+                log("Inserting income from "+from+": "+message);
                 dbHandler.insertRow(from,message);
             }
             adapter.changeCursor(dbHandler.getAllRows());
@@ -200,12 +199,14 @@ public class MessageFragment extends Fragment {
             String from = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN));
             String message = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.MESSAGE_COLUMN));
 
-            boolean outcome = (cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN))).equals("_me");
+            boolean outcome = (cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN))).equals(currentUser);
 
             if(outcome){
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textMessage.getLayoutParams());
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 textMessage.setLayoutParams(params);
+
+                textSender.setVisibility(View.GONE);
             } else{
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textSender.getLayoutParams());
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);

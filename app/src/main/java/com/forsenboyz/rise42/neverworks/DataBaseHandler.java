@@ -21,7 +21,7 @@ public class DataBaseHandler {
     }
 
     public void insertOutcome(String message){
-        insertRow("_me",message);
+        insertRow(currentUser,message);
     }
 
     public boolean isOpen(){
@@ -61,6 +61,7 @@ public class DataBaseHandler {
 
     public void setCurrentUser(String currentUser) {
         this.currentUser = currentUser;
+        Log.d("MY_TAG","Database user: "+this.currentUser);
     }
 }
 
