@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -25,16 +28,24 @@ import java.net.SocketTimeoutException;
 
 public class LoginFragment extends Fragment {
 
-    public static String IP = "192.168.0.30";
-    public static int PORT = 1488;
+    public UserSample[] samples = new UserSample[]{
+            new UserSample(1488, "Kappa", "passKappa"),
+            new UserSample(1489, "Keepo", "passKeepo"),
+            new UserSample(1490, "Kippa", "passKeppa")
+    };
+
+    public String IP = "192.168.0.30";
+    public int PORT = samples[0].port;    //maybe change to smth appropriate
 
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
 
     View fragmentHolder;    //xml root
-    EditText editLogin, editPassword;
-    Button buttonLogin;
+    EditText editIp, editLogin, editPassword;
+    Button buttonIp, buttonLogin;
+
+    MenuItem menuItemIP;
 
     private volatile boolean switchFragment = false; //indicates, whether login is successful
 
@@ -45,18 +56,36 @@ public class LoginFragment extends Fragment {
     public LoginFragment() {
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragmentHolder = inflater.inflate(R.layout.fragment_login, container, false);
 
+        editIp = (EditText) fragmentHolder.findViewById(R.id.editIp);
         editLogin = (EditText) fragmentHolder.findViewById(R.id.editLogin);
         editPassword = (EditText) fragmentHolder.findViewById(R.id.editPassword);
+
+        buttonIp = (Button) fragmentHolder.findViewById(R.id.buttonIP);
         buttonLogin = (Button) fragmentHolder.findViewById(R.id.buttonLogin);
 
-        //to0 lazy
-        editLogin.setText(R.string.loginKappa);
-        editPassword.setText(R.string.passKappa);
+        editIp.setVisibility(View.INVISIBLE);
+        buttonIp.setVisibility(View.INVISIBLE);
+
+        // Setting ip on SETIP, Kappa
+        buttonIp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                IP = editIp.getText().toString();
+                editIp.setVisibility(View.INVISIBLE);
+                buttonIp.setVisibility(View.INVISIBLE);
+                menuItemIP.setTitle(IP);
+            }
+        });
 
         // NEXT -> editPassword to focus
         editLogin.setOnEditorActionListener(new EditText.OnEditorActionListener() {
@@ -95,6 +124,40 @@ public class LoginFragment extends Fragment {
         log("LoginFragment created");
 
         return fragmentHolder;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.menu_main, menu);
+
+        menuItemIP = (MenuItem) menu.findItem(R.id.menuIP);
+        menuItemIP.setTitle(IP);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.main_item1) {
+            applySample(0);
+        } else if (id == R.id.main_item2) {
+            applySample(1);
+        } else if (id == R.id.main_item3) {
+            applySample(2);
+        } else if (id == R.id.menuIP){
+            editIp.setVisibility(View.VISIBLE);
+            buttonIp.setVisibility(View.VISIBLE);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void applySample(int number){
+        editLogin.setText(samples[number].username);
+        editPassword.setText(samples[number].password);
+        PORT = samples[number].port;
     }
 
     public Socket getSocket() {
@@ -237,7 +300,7 @@ public class LoginFragment extends Fragment {
         }
 
 
-        //unlocking button
+        //unlocking views
         private void unlockLogging() {
             log("Unlocking buttons");
             buttonLogin.setEnabled(true);

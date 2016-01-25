@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -44,6 +47,12 @@ public class MessageFragment extends Fragment {
 
     // Required empty public constructor
     public MessageFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -91,6 +100,27 @@ public class MessageFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        menu.clear();
+
+        inflater.inflate(R.menu.menu_message,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId() == R.id.menuDropDB){
+            dbHandler.dropTable();
+
+            adapter.changeCursor(dbHandler.getAllRows()); //updating cursor for adapter
+            listView.setAdapter(adapter); //without this wrong params applied
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     public void setSocket(Socket socket) {
         this.socket = socket;
@@ -167,6 +197,7 @@ public class MessageFragment extends Fragment {
             String from = values[0].substring(1, messageBeginning);
             String message = values[0].substring(messageBeginning+1);
 
+            log("Is "+from+" equals to "+currentUser+"?");
             if(from.equals(currentUser)){
                 log("Inserting outcome: "+message);
                 dbHandler.insertOutcome(message);
@@ -175,7 +206,8 @@ public class MessageFragment extends Fragment {
                 log("Inserting income from "+from+": "+message);
                 dbHandler.insertRow(from,message);
             }
-            adapter.changeCursor(dbHandler.getAllRows());
+            adapter.changeCursor(dbHandler.getAllRows()); //updating cursor for adapter
+            listView.setAdapter(adapter); //without this wrong params applied
         }
     }
 
@@ -199,18 +231,20 @@ public class MessageFragment extends Fragment {
             String from = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN));
             String message = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.MESSAGE_COLUMN));
 
-            boolean outcome = (cursor.getString(cursor.getColumnIndexOrThrow(DataBaseCreator.SENDER_COLUMN))).equals(currentUser);
+            //log("Is "+from+" equals to "+currentUser+"?");
 
-            if(outcome){
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textMessage.getLayoutParams());
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                textMessage.setLayoutParams(params);
+            if(currentUser.equals(from)){
+                //log("Yes, Applying outcome params");
+                RelativeLayout.LayoutParams incomeParams = new RelativeLayout.LayoutParams(textMessage.getLayoutParams());
+                incomeParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                textMessage.setLayoutParams(incomeParams);
 
                 textSender.setVisibility(View.GONE);
             } else{
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textSender.getLayoutParams());
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                textSender.setLayoutParams(params);
+                //log("No, Applying income params");
+                RelativeLayout.LayoutParams outcomeParams = new RelativeLayout.LayoutParams(textSender.getLayoutParams());
+                outcomeParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                textSender.setLayoutParams(outcomeParams);
             }
 
             textSender.setText(from);

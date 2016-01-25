@@ -22,4 +22,8 @@
         android:orderInCategory="1"
         app:showAsAction="never"/>
 
+    <item
+        android:title="@string/setIp"
+        android:id="@+id/menuIP" />
+
 </menu>

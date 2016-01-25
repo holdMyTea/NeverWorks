@@ -76,7 +76,7 @@ class DataBaseCreator extends SQLiteOpenHelper {
     public static final String[] KEYS = {ID_COLUMN, SENDER_COLUMN,MESSAGE_COLUMN};
 
     public static final String DATABASE_NAME = "messageBase.db";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_TABLE = "messages";
 
     DataBaseCreator(Context context){
